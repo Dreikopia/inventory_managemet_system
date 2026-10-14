@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Boxes, LayoutDashboard, LogOutIcon, Package, Settings, Wind } from 'lucide-react';
+import { Boxes, LayoutDashboard, LogOutIcon, Package, Settings, ShoppingCart, Tag, Wind } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
     Sidebar,
@@ -15,10 +15,29 @@ import {
     SidebarRail,
 } from '@/components/ui/sidebar';
 
-const navItems = [
-    { title: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { title: 'Products', href: '/products', icon: Package },
-    { title: 'Stock', href: '/stocks', icon: Boxes },
+const navGroups = [
+    {
+        label: 'General',
+        items: [
+            { title: 'Dashboard', href: '/', icon: LayoutDashboard },
+        ],
+    },
+    {
+        label: 'Sales',
+        items: [
+            { title: 'Sales', href: '/sales', icon: ShoppingCart },
+
+        ],
+    },
+
+    {
+        label: 'Inventory',
+        items: [
+            { title: 'Products', href: '/products', icon: Package },
+            { title: 'category', href: '/category', icon: Tag },
+            { title: 'Stock', href: '/stocks', icon: Boxes },
+        ],
+    },
 ];
 
 const isActivePath = (currentPath, href) =>
@@ -43,25 +62,27 @@ const AppSidebar = ({ ...props }) => {
             </SidebarHeader>
 
             <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Main</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {navItems.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton
-                                        tooltip={item.title}
-                                        isActive={isActivePath(url, item.href)}
-                                        render={<Link href={item.href} />}
-                                    >
-                                        <item.icon />
-                                        <span>{item.title}</span>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {navGroups.map((group) => (
+                    <SidebarGroup key={group.label}>
+                        <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {group.items.map((item) => (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton
+                                            tooltip={item.title}
+                                            isActive={isActivePath(url, item.href)}
+                                            render={<Link href={item.href} />}
+                                        >
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                ))}
             </SidebarContent>
 
             <SidebarFooter>

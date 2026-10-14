@@ -24,8 +24,6 @@ const statusLabels = {
   out_of_stock: 'Out of stock',
 };
 
-
-
 const Products = ({ products, categories }) => {
 
   const [createOpen, setCreateOpen] = useState(false)
