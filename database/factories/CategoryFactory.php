@@ -32,7 +32,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->randomElement(self::NAMES),
+            'name' => ucwords(fake()->unique()->words(2, true)),
         ];
     }
 }

@@ -4,13 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Realistic air-care product names, assigned to categories round-robin.
      *
@@ -54,7 +51,7 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = Category::all();
+        $categories = Category::query()->orderBy('id')->get();
 
         if ($categories->isEmpty()) {
             $this->command?->warn('No categories found — run CategorySeeder first.');
@@ -62,23 +59,31 @@ class ProductSeeder extends Seeder
             return;
         }
 
+        $seeded = collect();
+
         foreach (self::PRODUCTS as $index => $name) {
-            Product::factory()->create([
-                'name' => $name,
-                'category_id' => $categories[$index % $categories->count()]->id,
-            ]);
+            $sku = sprintf('AC-%05d', $index + 1);
+
+            $product = Product::query()->firstOrCreate(
+                ['sku' => $sku],
+                Product::factory()->raw([
+                    'sku' => $sku,
+                    'name' => $name,
+                    'category_id' => $categories[$index % $categories->count()]->id,
+                ]),
+            );
+
+            if ($product->wasRecentlyCreated) {
+                $seeded->push($product);
+            }
         }
 
-        // Flag a few products below their reorder level so low-stock
-        // behaviour can be exercised against seeded data.
-        Product::query()
-            ->inRandomOrder()
-            ->limit(3)
-            ->get()
-            ->each(function (Product $product) {
-                $product->update([
-                    'in_stock' => fake()->numberBetween(0, $product->reorder_level),
-                ]);
-            });
+        // Flag a few newly seeded products below their reorder level so
+        // low-stock behaviour can be exercised against seeded data.
+        $seeded->random(min(3, $seeded->count()))->each(function (Product $product) {
+            $product->update([
+                'in_stock' => fake()->numberBetween(0, $product->reorder_level),
+            ]);
+        });
     }
 }

@@ -36,7 +36,7 @@ const ProductRowActions = ({ product, onDelete }) => {
         <DropdownMenuSeparator />
 
         {/* TODO: soft delete — API endpoint not built yet. */}
-        <DropdownMenuItem variant="destructive" onClick={() => onDelete(product)}>
+        <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(product)}>
           <Trash />
           Delete
         </DropdownMenuItem>

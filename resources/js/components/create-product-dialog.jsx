@@ -23,8 +23,6 @@ import {
 } from '@/components/ui/select';
 import { AttachmentUpload } from './motion/attachment-upload';
 
-// One small component that every field reuses: label on top, input in the
-// middle, error message below. Same spacing everywhere = consistent look.
 const Field = ({ label, htmlFor, error, className = '', children }) => (
     <div className={`grid gap-1.5 ${className}`}>
         <Label htmlFor={htmlFor}>{label}</Label>
@@ -70,10 +68,7 @@ const CreateProductDialog = ({ open, onOpenChange, categories }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            {/*
-              flex + max-h: the dialog can never be taller than 90% of the screen.
-              Header and footer keep their size; only the middle part scrolls.
-            */}
+        
             <DialogContent className="flex max-h-[90vh] flex-col gap-4 sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>New product</DialogTitle>

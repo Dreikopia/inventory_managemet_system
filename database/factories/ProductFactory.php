@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Http\UploadedFile;
 
 /**
  * @extends Factory<Product>
@@ -35,6 +36,18 @@ class ProductFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'in_stock' => fake()->numberBetween(0, $attributes['reorder_level']),
+        ]);
+    }
+
+    /**
+     * Indicate that the product has an image stored on the public disk.
+     */
+    public function withImage(): static
+    {
+        return $this->state(fn () => [
+            'image_path' => UploadedFile::fake()
+                ->image('product.jpg')
+                ->store('images/products', 'public'),
         ]);
     }
 }
