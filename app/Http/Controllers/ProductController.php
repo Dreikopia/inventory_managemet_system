@@ -25,7 +25,9 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validated = $request->validated();
-
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('images/products', 'public');
+        }
         Product::create($validated);
 
         return redirect()
