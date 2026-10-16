@@ -1,4 +1,4 @@
-import { Ellipsis, Eye, Pencil, SlidersHorizontal, Trash } from 'lucide-react';
+import { Ellipsis, Pencil, SlidersHorizontal, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const ProductRowActions = ({ product, onDelete }) => {
+const ProductRowActions = ({ product, onEdit, onDelete }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -19,15 +19,12 @@ const ProductRowActions = ({ product, onDelete }) => {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        {/* TODO: wire these three actions once their routes exist. */}
-        <DropdownMenuItem>
-          <Eye />
-          View
-        </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onEdit?.(product)}>
           <Pencil />
           Edit
         </DropdownMenuItem>
+
+        {/* TODO: stock adjustment route not built yet. */}
         <DropdownMenuItem>
           <SlidersHorizontal />
           Adjust stock

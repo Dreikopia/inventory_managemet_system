@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -33,5 +35,39 @@ class ProductController extends Controller
         return redirect()
             ->route('products')
             ->with('success', 'Product created successfully.');
+    }
+
+    /**
+     * Update an existing product, swapping the stored image only when one was
+     * uploaded or explicitly removed.
+     *
+     * @param  array<int, mixed>  $validated
+     */
+    public function update(UpdateProductRequest $request, Product $product)
+    {
+        $validated = $request->validated();
+
+        $imageProvided = $request->hasFile('image');
+        // Inertia encodes booleans in FormData as "1"/"0"; boolean() reads
+        // those back correctly and also tolerates true/false and "true"/"false".
+        $removeImage = $request->boolean('remove_image');
+
+        unset($validated['image'], $validated['remove_image']);
+
+        if ($imageProvided) {
+            if ($product->image_path) {
+                Storage::disk('public')->delete($product->image_path);
+            }
+            $validated['image_path'] = $request->file('image')->store('images/products', 'public');
+        } elseif ($removeImage && $product->image_path) {
+            Storage::disk('public')->delete($product->image_path);
+            $validated['image_path'] = null;
+        }
+
+        $product->update($validated);
+
+        return redirect()
+            ->route('products')
+            ->with('success', 'Product updated successfully.');
     }
 }

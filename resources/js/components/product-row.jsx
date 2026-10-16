@@ -13,29 +13,45 @@ const statusStyles = {
   out_of_stock: 'bg-destructive/15 text-destructive',
 };
 
-const ProductThumbnail = ({ product }) =>
+export const ProductThumbnail = ({ product, className }) =>
   product.image_url ? (
     <img
       src={product.image_url}
-      alt={product.name}
-      className="size-12 shrink-0 rounded-lg object-cover"
+      alt=""
+      className={cn('size-12 shrink-0 rounded-lg object-cover', className)}
     />
   ) : (
     <div
-      className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"
+      className={cn(
+        'flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground',
+        className,
+      )}
       aria-hidden="true"
     >
       <ImageIcon className="size-5" />
     </div>
   );
 
-const ProductRow = ({ product, className, onDelete }) => (
-  <li className={cn('flex items-center gap-4 p-3', className)}>
+const ProductRow = ({ product, className, onEdit, onDelete }) => (
+  <li
+    className={cn(
+      'flex items-center gap-4 p-3 transition-colors',
+      onEdit && 'cursor-pointer hover:bg-muted/60',
+      className,
+    )}
+    onClick={onEdit ? () => onEdit(product) : undefined}
+  >
     <ProductThumbnail product={product} />
 
-    {/* Name + meta line */}
+    {/* Name + meta line — the button gives keyboard users a way in, and its
+        click bubbles to the row handler. */}
     <div className="min-w-0 flex-1">
-      <p className="truncate font-medium">{product.name}</p>
+      <button
+        type="button"
+        className="block w-full max-w-full truncate rounded-sm text-left font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {product.name}
+      </button>
 
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
         <span>{product.sku}</span>
@@ -57,15 +73,13 @@ const ProductRow = ({ product, className, onDelete }) => (
 
     {/* Price */}
     <div className="shrink-0 text-right">
-      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-        Unit price
-      </p>
-      <p className="font-medium tabular-nums">
-        {currency.format(product.unit_price)}
-      </p>
+      <p className="font-medium tabular-nums">{currency.format(product.unit_price)}</p>
     </div>
 
-    <ProductRowActions product={product} onDelete={onDelete} />
+    {/* Stops menu clicks — including portaled items — from opening the drawer. */}
+    <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+      <ProductRowActions product={product} onEdit={onEdit} onDelete={onDelete} />
+    </div>
   </li>
 );
 

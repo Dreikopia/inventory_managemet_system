@@ -615,6 +615,7 @@ function AttachmentRow({
 }
 
 export function AttachmentUpload({
+  id,
   value,
   defaultValue,
   onValueChange,
@@ -843,7 +844,7 @@ export function AttachmentUpload({
       <div className={cn("w-full", className)}>
       <input
         ref={inputRef}
-        id={inputId}
+        id={id ?? inputId}
         type="file"
         aria-label="Upload attachments"
         accept={accept}
