@@ -100,6 +100,205 @@ it('rejects a product with a duplicate sku', function () {
     $this->assertDatabaseCount('products', 1);
 });
 
+it('updates a product', function () {
+    $product = Product::factory()->create([
+        'name' => 'Old Name',
+        'sku' => 'AC-UPDATE-01',
+        'in_stock' => 5,
+    ]);
+    $category = Category::factory()->create();
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => 'New Name',
+        'sku' => $product->sku,
+        'category_id' => $category->id,
+        'in_stock' => 88,
+        'unit_price' => 42.50,
+        'reorder_level' => 12,
+    ]);
+
+    $response
+        ->assertRedirect(route('products'))
+        ->assertSessionHas('success', 'Product updated successfully.');
+
+    expect($product->fresh())
+        ->name->toBe('New Name')
+        ->category_id->toBe($category->id)
+        ->in_stock->toBe(88)
+        ->unit_price->toBe(42.50)
+        ->reorder_level->toBe(12);
+});
+
+it('replaces the product image and deletes the previous file', function () {
+    Storage::fake('public');
+    $product = Product::factory()->withImage()->create();
+    $originalPath = $product->image_path;
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+        'image' => UploadedFile::fake()->image('replacement.png'),
+    ]);
+
+    $response->assertRedirect(route('products'));
+
+    $product->refresh();
+
+    expect($product->image_path)->toStartWith('images/products/')
+        ->and($product->image_path)->not->toBe($originalPath);
+
+    Storage::disk('public')->assertExists($product->image_path);
+    Storage::disk('public')->assertMissing($originalPath);
+});
+
+it('removes the product image when asked and no new file is sent', function () {
+    Storage::fake('public');
+    $product = Product::factory()->withImage()->create();
+    $originalPath = $product->image_path;
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+        'remove_image' => true,
+    ]);
+
+    $response->assertRedirect(route('products'));
+
+    expect($product->fresh()->image_path)->toBeNull();
+    Storage::disk('public')->assertMissing($originalPath);
+});
+
+it('keeps the existing product image when neither is sent', function () {
+    Storage::fake('public');
+    $product = Product::factory()->withImage()->create();
+    $originalPath = $product->image_path;
+
+    $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => 77,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+    ])->assertRedirect(route('products'));
+
+    expect($product->fresh()->image_path)->toBe($originalPath);
+    Storage::disk('public')->assertExists($originalPath);
+});
+
+it('rejects an update with required fields missing', function () {
+    $product = Product::factory()->create();
+
+    $response = $this->put(route('products.update', $product), []);
+
+    $response->assertSessionHasErrors(['name', 'sku', 'category_id', 'in_stock', 'unit_price', 'reorder_level']);
+
+    expect($product->fresh()->name)->toBe($product->name);
+});
+
+it('allows a product to keep its own sku on update', function () {
+    $product = Product::factory()->create(['sku' => 'AC-KEEP-01']);
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => 'AC-KEEP-01',
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+    ]);
+
+    $response->assertRedirect(route('products'));
+    $response->assertSessionHasNoErrors();
+});
+
+it('rejects an update with a sku taken by another product', function () {
+    $taken = Product::factory()->create(['sku' => 'AC-TAKEN']);
+    $product = Product::factory()->create(['sku' => 'AC-OWNER']);
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $taken->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+    ]);
+
+    $response->assertSessionHasErrors('sku');
+
+    expect($product->fresh()->sku)->toBe('AC-OWNER');
+});
+
+it('rejects an update when the image is not a supported image file', function () {
+    $product = Product::factory()->create();
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+        'image' => UploadedFile::fake()->create('manual.txt', 12, 'text/plain'),
+    ]);
+
+    $response->assertSessionHasErrors('image');
+});
+
+it('adds an image to a product that has none without touching the disk', function () {
+    Storage::fake('public');
+    $product = Product::factory()->create(['image_path' => null]);
+
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+        'image' => UploadedFile::fake()->image('first.png'),
+    ]);
+
+    $response->assertRedirect(route('products'));
+
+    $product->refresh();
+
+    expect($product->image_path)->toStartWith('images/products/');
+    Storage::disk('public')->assertExists($product->image_path);
+});
+
+it('keeps the existing product image when remove_image is sent as false', function () {
+    Storage::fake('public');
+    $product = Product::factory()->withImage()->create();
+
+    // Inertia writes booleans into FormData as "1"/"0".
+    $response = $this->put(route('products.update', $product), [
+        'name' => $product->name,
+        'sku' => $product->sku,
+        'category_id' => $product->category_id,
+        'in_stock' => $product->in_stock,
+        'unit_price' => $product->unit_price,
+        'reorder_level' => $product->reorder_level,
+        'remove_image' => '0',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $product->refresh();
+
+    expect($product->image_path)->not->toBeNull();
+    Storage::disk('public')->assertExists($product->image_path);
+});
+
 it('lists products with their appended stock status and image url', function () {
     Storage::fake('public');
 

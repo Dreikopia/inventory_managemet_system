@@ -550,7 +550,9 @@ export function Tooltip(props) {
   if (!root.anchorRef && !isValidElement(children)) return children ?? null;
   return (
     <TooltipRoot {...root} initialEmpty={isEmpty(content)}>
-      {isValidElement(children) ? <TooltipTrigger>{children}</TooltipTrigger> : null}
+      {/* asChild: the child is often a button already, and a button inside a
+          button makes the parser close the outer one, hoisting the child out. */}
+      {isValidElement(children) ? <TooltipTrigger asChild>{children}</TooltipTrigger> : null}
       <TooltipContent
         side={side}
         align={align}
