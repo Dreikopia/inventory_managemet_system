@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('sku')->unique();
-            $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Category::class)->constrained()->restrictOnDelete();
             $table->unsignedInteger('in_stock')->default(0);
             $table->decimal('unit_price', 8, 2);
             $table->unsignedInteger('reorder_level')->default(0);

@@ -48,8 +48,6 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         $imageProvided = $request->hasFile('image');
-        // Inertia encodes booleans in FormData as "1"/"0"; boolean() reads
-        // those back correctly and also tolerates true/false and "true"/"false".
         $removeImage = $request->boolean('remove_image');
 
         unset($validated['image'], $validated['remove_image']);

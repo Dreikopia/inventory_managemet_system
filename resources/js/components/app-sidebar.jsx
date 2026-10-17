@@ -34,7 +34,7 @@ const navGroups = [
         label: 'Inventory',
         items: [
             { title: 'Products', href: '/products', icon: Package },
-            { title: 'category', href: '/category', icon: Tag },
+            { title: 'category', href: '/categories', icon: Tag },
             { title: 'Stock', href: '/stocks', icon: Boxes },
             { title: 'Suppliers', href: '/supplier', icon: PersonStanding },
         ],
