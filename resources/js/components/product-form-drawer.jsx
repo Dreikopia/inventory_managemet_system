@@ -37,7 +37,6 @@ const emptyForm = () => ({
     sku: '',
     category_id: '',
     in_stock: '',
-    unit_price: '',
     reorder_level: '',
     image: null,
     remove_image: false,
