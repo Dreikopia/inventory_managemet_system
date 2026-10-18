@@ -1,5 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
-import { Boxes, LayoutDashboard, LogOutIcon, Package, PersonStanding, Settings, ShoppingCart, Tag, Wind } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { Boxes, FileChartColumn, LayoutDashboard, LogOutIcon, Package, PersonStanding, Settings, ShoppingCart, Tag, Wind } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
     Sidebar,
@@ -37,6 +37,7 @@ const navGroups = [
             { title: 'category', href: '/categories', icon: Tag },
             { title: 'Stock', href: '/stocks', icon: Boxes },
             { title: 'Suppliers', href: '/supplier', icon: PersonStanding },
+            { title: 'Reports', href: '/reports', icon: FileChartColumn },
         ],
     },
 ];
@@ -98,7 +99,10 @@ const AppSidebar = ({ ...props }) => {
 
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Logout" render={<Link href="/settings" />}>
+                        <SidebarMenuButton
+                            tooltip="Logout"
+                            onClick={() => router.delete('/logout', { preserveScroll: true })}
+                        >
                             <LogOutIcon />
                             <span>Logout</span>
                         </SidebarMenuButton>

@@ -2,10 +2,15 @@
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->create());
+});
 
 it('creates a product with an uploaded image', function () {
     Storage::fake('public');

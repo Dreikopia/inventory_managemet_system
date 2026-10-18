@@ -22,6 +22,7 @@ class CategoryFactory extends Factory
         'Air Purifiers',
         'Ductwork',
         'Thermostats',
+        'Air Conditioners',
     ];
 
     /**
