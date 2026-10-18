@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class ProductSeeder extends Seeder
 {
@@ -25,25 +28,27 @@ class ProductSeeder extends Seeder
         'Whole-Home HEPA Media Cabinet',
         'Universal Blower Motor',
         'HVAC Capacitor 45/5 MFD',
-        'Contactor 24V 30A',
-        'Condenser Fan Motor',
-        'Igniter Kit for Gas Furnace',
-        'Flame Sensor Assembly',
-        'HVAC Belt Drive Pulley',
-        '5000 BTU Portable Air Purifier',
-        'True HEPA Tower Purifier',
-        'Large Room Air Purifier',
-        'UV Light Air Purifier',
-        'Desktop HEPA Air Purifier',
-        '20ft Insulated Duct Roll',
-        '6in Adjustable Register Boot',
-        'Galvanized Duct Clamp (10-Pack)',
-        'Foil Duct Tape 2in x 60yd',
-        'Duct Seam Mastic Sealant',
-        'Smart Wi-Fi Thermostat',
-        'Programmable 7-Day Thermostat',
-        'Non-Programmable Thermostat',
         'Digital Thermostat with Humidity Sensor',
+        'GREE Outdoor Condenser Unit',
+        'LG Inverter Wall-Mounted Split AC',
+        'Soleus Window Air Conditioner',
+        'Mitsubishi Wall-Mounted Split AC',
+        'Condenser Fan Blade',
+    ];
+
+    /**
+     * Source image for products that ship with one, keyed by product name.
+     * Files live in database/seeders/images/products and are copied onto the
+     * public disk under a deterministic SKU-based filename.
+     *
+     * @var array<string, string>
+     */
+    private const PRODUCT_IMAGES = [
+        'GREE Outdoor Condenser Unit' => 'gree-outdoor-condenser-unit.png',
+        'LG Inverter Wall-Mounted Split AC' => 'lg-inverter-wall-mounted-split.png',
+        'Soleus Window Air Conditioner' => 'soleus-window-air-conditioner.png',
+        'Mitsubishi Wall-Mounted Split AC' => 'mitsubishi-wall-mounted-split.png',
+        'Condenser Fan Blade' => 'condenser-fan-blade.webp',
     ];
 
     /**
@@ -64,14 +69,23 @@ class ProductSeeder extends Seeder
         foreach (self::PRODUCTS as $index => $name) {
             $sku = sprintf('AC-%05d', $index + 1);
 
+            $image = self::PRODUCT_IMAGES[$name] ?? null;
+            $imagePath = $image === null ? null : $this->storeImage($sku, $image);
+
             $product = Product::query()->firstOrCreate(
                 ['sku' => $sku],
                 Product::factory()->raw([
                     'sku' => $sku,
                     'name' => $name,
-                    'category_id' => $categories[$index % $categories->count()]->id,
+                    'category_id' => $this->categoryIdFor($name, $categories, $index),
+                    'image_path' => $imagePath,
                 ]),
             );
+
+            // Backfill the image on products that were seeded before images existed.
+            if ($imagePath !== null && $product->image_path === null) {
+                $product->update(['image_path' => $imagePath]);
+            }
 
             if ($product->wasRecentlyCreated) {
                 $seeded->push($product);
@@ -85,5 +99,44 @@ class ProductSeeder extends Seeder
                 'in_stock' => fake()->numberBetween(0, $product->reorder_level),
             ]);
         });
+    }
+
+    /**
+     * Air-conditioner products land in the Air Conditioners category; the
+     * remaining products are assigned round-robin across all categories.
+     *
+     * @param  Collection<int, Category>  $categories
+     */
+    private function categoryIdFor(string $name, Collection $categories, int $index): int
+    {
+        $category = isset(self::PRODUCT_IMAGES[$name])
+            ? $categories->firstWhere('name', 'Air Conditioners')
+            : null;
+
+        return ($category ?? $categories[$index % $categories->count()])->id;
+    }
+
+    /**
+     * Copy a committed seed image onto the public disk under a deterministic
+     * SKU-based filename, returning the stored path or null when the source
+     * file is missing.
+     */
+    private function storeImage(string $sku, string $filename): ?string
+    {
+        $source = database_path('seeders/images/products/'.$filename);
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $path = sprintf('images/products/%s.%s', strtolower($sku), $extension);
+
+        if (! is_file($source)) {
+            $this->command?->warn("Missing seed image [{$filename}] — skipping for SKU {$sku}.");
+
+            return null;
+        }
+
+        if (! Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->put($path, File::get($source));
+        }
+
+        return $path;
     }
 }
