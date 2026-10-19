@@ -4,7 +4,7 @@ import ProductFormDrawer from '@/components/product-form-drawer';
 import { Button } from '@/components/ui/button';
 import ProductRow from '@/components/product-row';
 
-const Products = ({ products, categories }) => {
+const Index = ({ products, categories }) => {
   const [drawer, setDrawer] = useState({ open: false, product: null });
 
   const openCreate = () => setDrawer({ open: true, product: null });
@@ -54,6 +54,6 @@ const Products = ({ products, categories }) => {
   );
 };
 
-Products.layout = (page) => <AppLayout>{page}</AppLayout>;
+Index.layout = (page) => <AppLayout>{page}</AppLayout>;
 
-export default Products;
+export default Index;

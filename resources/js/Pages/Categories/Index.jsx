@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import CategoryRowActions from '@/components/category-row-actions';
 
-const Categories = ({ categories }) => {
+const Index = ({ categories }) => {
 
     const [modal, setModal] = useState({ open: false, category: null });
 
@@ -99,6 +99,6 @@ const Categories = ({ categories }) => {
     );
 }
 
-Categories.layout = (page) => <AppLayout>{page}</AppLayout>;
+Index.layout = (page) => <AppLayout>{page}</AppLayout>;
 
-export default Categories;
+export default Index;
