@@ -1,6 +1,21 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { Boxes, FileChartColumn, LayoutDashboard, LogOutIcon, Package, PersonStanding, Settings, ShoppingCart, Tag, Wind } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+    Boxes,
+    FileChartColumn,
+    LayoutDashboard,
+    LogOutIcon,
+    Package,
+    Settings,
+    ShoppingCart,
+    Tag,
+    Wind,
+    PackagePlus,
+    PackageMinus,
+    ArrowLeftRight,
+    ChartPie,
+    Truck,
+    SlidersHorizontal
+} from 'lucide-react';
 import {
     Sidebar,
     SidebarContent,
@@ -14,30 +29,46 @@ import {
     SidebarMenuItem,
     SidebarRail,
 } from '@/components/ui/sidebar';
+import { ChevronRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton,
+} from '@/components/ui/sidebar';
 
 const navGroups = [
     {
         label: 'General',
         items: [
             { title: 'Dashboard', href: '/', icon: LayoutDashboard },
-        ],
-    },
-    {
-        label: 'Sales',
-        items: [
             { title: 'Sales', href: '/sales', icon: ShoppingCart },
-
+            { title: 'Reports', href: '/reports', icon: FileChartColumn },
         ],
     },
-
     {
-        label: 'Inventory',
+        label: 'Catalog',
         items: [
             { title: 'Products', href: '/products', icon: Package },
             { title: 'category', href: '/categories', icon: Tag },
-            { title: 'Stock', href: '/stocks', icon: Boxes },
-            { title: 'Suppliers', href: '/supplier', icon: PersonStanding },
-            { title: 'Reports', href: '/reports', icon: FileChartColumn },
+            { title: 'Suppliers', href: '/supplier', icon: Truck },
+        ]
+    },
+
+    {
+        label: 'Management',
+        items: [
+            {
+                title: 'Inventory',
+                icon: Boxes,
+                children: [
+                    { title: 'Overview', href: '/overview', icon: ChartPie },
+                    { title: 'Stock In', href: '/stockin', icon: PackagePlus },
+                    { title: 'Stock Out', href: '/stockout', icon: PackageMinus },
+                    { title: 'Movements', href: '/movements', icon: ArrowLeftRight },
+                    { title: 'Adjustments', href: '/adjusments', icon: SlidersHorizontal },
+                ],
+            }
         ],
     },
 ];
@@ -64,23 +95,61 @@ const AppSidebar = ({ ...props }) => {
             </SidebarHeader>
 
             <SidebarContent>
+
                 {navGroups.map((group) => (
                     <SidebarGroup key={group.label}>
                         <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {group.items.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton
-                                            tooltip={item.title}
-                                            isActive={isActivePath(url, item.href)}
-                                            render={<Link href={item.href} />}
+                                {group.items.map((item) =>
+                                    item.children ? (
+                                        // This item has children, so render a dropdown
+                                        <Collapsible
+                                            key={item.title}
+                                            defaultOpen={item.children.some((child) => isActivePath(url, child.href))}
+                                            render={<SidebarMenuItem />}
                                         >
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
+                                            <CollapsibleTrigger
+                                                render={<SidebarMenuButton tooltip={item.title} />}
+                                                className="[&[data-panel-open]>svg:last-child]:rotate-90"
+                                            >
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                                <ChevronRight className="ml-auto transition-transform duration-200" />
+                                            </CollapsibleTrigger>
+
+                                            <CollapsibleContent
+                                                className="h-[var(--collapsible-panel-height)] overflow-hidden transition-[height] duration-200 ease-out data-[starting-style]:h-0 data-[ending-style]:h-0"
+                                            >
+                                                <SidebarMenuSub>
+                                                    {item.children.map((child) => (
+                                                        <SidebarMenuSubItem key={child.title}>
+                                                            <SidebarMenuSubButton
+                                                                isActive={isActivePath(url, child.href)}
+                                                                render={<Link href={child.href} />}
+                                                            >
+                                                                <child.icon />
+                                                                <span>{child.title}</span>
+                                                            </SidebarMenuSubButton>
+                                                        </SidebarMenuSubItem>
+                                                    ))}
+                                                </SidebarMenuSub>
+                                            </CollapsibleContent>
+                                        </Collapsible>
+                                    ) : (
+                                        // No children, so render a normal link (your original code)
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton
+                                                tooltip={item.title}
+                                                isActive={isActivePath(url, item.href)}
+                                                render={<Link href={item.href} />}
+                                            >
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ),
+                                )}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
