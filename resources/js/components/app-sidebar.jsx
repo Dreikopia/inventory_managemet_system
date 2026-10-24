@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { Boxes, FileChartColumn, LayoutDashboard, LogOutIcon, Package, PersonStanding, Settings, ShoppingCart, Tag, Wind } from 'lucide-react';
+import { ArrowLeftRight, Boxes, FileChartColumn, LayoutDashboard, LogOutIcon, Package, Settings, ShoppingCart, Tag, TruckIcon, Wind } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
     Sidebar,
@@ -20,24 +20,27 @@ const navGroups = [
         label: 'General',
         items: [
             { title: 'Dashboard', href: '/', icon: LayoutDashboard },
-        ],
-    },
-    {
-        label: 'Sales',
-        items: [
+            { title: 'Reports', href: '/reports', icon: FileChartColumn },
             { title: 'Sales', href: '/sales', icon: ShoppingCart },
 
         ],
     },
-
     {
-        label: 'Inventory',
+        label: 'Catalog',
         items: [
             { title: 'Products', href: '/products', icon: Package },
+
             { title: 'category', href: '/categories', icon: Tag },
-            { title: 'Stock', href: '/stocks', icon: Boxes },
-            { title: 'Suppliers', href: '/supplier', icon: PersonStanding },
-            { title: 'Reports', href: '/reports', icon: FileChartColumn },
+            { title: 'Suppliers', href: '/supplier', icon: TruckIcon },
+
+        ],
+    },
+
+    {
+        label: 'Management',
+        items: [
+            { title: 'Inventory', href: '/Inventory', icon: Boxes },
+            { title: 'Movements', href: '/Movements', icon: ArrowLeftRight },
         ],
     },
 ];
