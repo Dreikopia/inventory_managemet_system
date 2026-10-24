@@ -12,47 +12,82 @@ use Illuminate\Support\Facades\Storage;
 class ProductSeeder extends Seeder
 {
     /**
-     * Realistic air-care product names, assigned to categories round-robin.
+     * Air-conditioner products seeded with an image, in image order.
+     * Each entry is paired with the matching file in PRODUCT_IMAGES and
+     * assigned to the Air Conditioners category.
      *
      * @var list<string>
      */
-    private const PRODUCTS = [
+    private const AIR_CONDITIONERS = [
+        'Soleus Air Window Air Conditioner',
+        'LG Inverter V Wall-Mounted Split AC',
+        '10,000 BTU Slider Window Air Conditioner',
+        'Soleus Air 8,000 BTU Window Air Conditioner',
+        'LG Inverter V Slim Wall-Mounted Split AC',
+        'Soleus Air 12,000 BTU Window Air Conditioner',
+        'LG Artcool Inverter Wall-Mounted Split AC',
+        '12,000 BTU Window Air Conditioner',
+        'Mitsubishi Heavy Industries Wall-Mounted Split AC',
+        'Electrolux AirGate Wall-Mounted Split AC',
+    ];
+
+    /**
+     * Products seeded without an image, assigned round-robin across the
+     * non-air-conditioner categories.
+     *
+     * @var list<string>
+     */
+    private const OTHER_PRODUCTS = [
         '16x25x1 Pleated Air Filter',
         '20x20x1 MERV 11 Filter',
-        '14x14x1 Carbon Air Filter',
         '4x10x1 Furnace Filter',
         '20x25x2 HEPA Filter',
-        '16x20x1 HEPA Filter',
         'True HEPA Replacement Cartridge',
         'HEPA Media Filter Pack (3-Pack)',
         'Whole-Home HEPA Media Cabinet',
         'Universal Blower Motor',
         'HVAC Capacitor 45/5 MFD',
         'Digital Thermostat with Humidity Sensor',
-        'GREE Outdoor Condenser Unit',
-        'LG Inverter Wall-Mounted Split AC',
-        'Soleus Window Air Conditioner',
-        'Mitsubishi Wall-Mounted Split AC',
-        'Condenser Fan Blade',
     ];
 
     /**
-     * Source image for products that ship with one, keyed by product name.
+     * Source image for each air-conditioner product, keyed by product name.
      * Files live in database/seeders/images/products and are copied onto the
      * public disk under a deterministic SKU-based filename.
      *
      * @var array<string, string>
      */
     private const PRODUCT_IMAGES = [
-        'GREE Outdoor Condenser Unit' => 'gree-outdoor-condenser-unit.png',
-        'LG Inverter Wall-Mounted Split AC' => 'lg-inverter-wall-mounted-split.png',
-        'Soleus Window Air Conditioner' => 'soleus-window-air-conditioner.png',
-        'Mitsubishi Wall-Mounted Split AC' => 'mitsubishi-wall-mounted-split.png',
-        'Condenser Fan Blade' => 'condenser-fan-blade.webp',
+        'Soleus Air Window Air Conditioner' => 'ac1.png',
+        'LG Inverter V Wall-Mounted Split AC' => 'ac2.png',
+        '10,000 BTU Slider Window Air Conditioner' => 'ac3.png',
+        'Soleus Air 8,000 BTU Window Air Conditioner' => 'ac4.png',
+        'LG Inverter V Slim Wall-Mounted Split AC' => 'ac5.png',
+        'Soleus Air 12,000 BTU Window Air Conditioner' => 'ac6.png',
+        'LG Artcool Inverter Wall-Mounted Split AC' => 'ac7.png',
+        '12,000 BTU Window Air Conditioner' => 'ac8.png',
+        'Mitsubishi Heavy Industries Wall-Mounted Split AC' => 'ac9.png',
+        'Electrolux AirGate Wall-Mounted Split AC' => 'ac10.png',
     ];
 
     /**
-     * Seed the application's products.
+     * Categories the non-air-conditioner products are distributed across.
+     * Excludes Air Conditioners, which only receives seeded image products.
+     *
+     * @var list<string>
+     */
+    private const OTHER_CATEGORY_NAMES = [
+        'Air Filters',
+        'HEPA Filters',
+        'HVAC Parts',
+        'Air Purifiers',
+        'Ductwork',
+        'Thermostats',
+    ];
+
+    /**
+     * Seed the application's products: 10 air conditioners with images and
+     * 10 products across the remaining categories without images.
      */
     public function run(): void
     {
@@ -64,32 +99,29 @@ class ProductSeeder extends Seeder
             return;
         }
 
+        $airConditionerCategory = $categories->firstWhere('name', 'Air Conditioners');
+        $otherCategories = $categories
+            ->filter(fn (Category $category): bool => in_array($category->name, self::OTHER_CATEGORY_NAMES, true))
+            ->values();
+
+        if ($airConditionerCategory === null || $otherCategories->isEmpty()) {
+            $this->command?->warn('Missing required categories — run CategorySeeder first.');
+
+            return;
+        }
+
         $seeded = collect();
 
-        foreach (self::PRODUCTS as $index => $name) {
-            $sku = sprintf('AC-%05d', $index + 1);
+        foreach (self::AIR_CONDITIONERS as $index => $name) {
+            $product = $this->seedProduct($name, $index, $airConditionerCategory->id, $seeded);
+        }
 
-            $image = self::PRODUCT_IMAGES[$name] ?? null;
-            $imagePath = $image === null ? null : $this->storeImage($sku, $image);
+        foreach (self::OTHER_PRODUCTS as $index => $name) {
+            $category = $otherCategories[$index % $otherCategories->count()];
 
-            $product = Product::query()->firstOrCreate(
-                ['sku' => $sku],
-                Product::factory()->raw([
-                    'sku' => $sku,
-                    'name' => $name,
-                    'category_id' => $this->categoryIdFor($name, $categories, $index),
-                    'image_path' => $imagePath,
-                ]),
-            );
-
-            // Backfill the image on products that were seeded before images existed.
-            if ($imagePath !== null && $product->image_path === null) {
-                $product->update(['image_path' => $imagePath]);
-            }
-
-            if ($product->wasRecentlyCreated) {
-                $seeded->push($product);
-            }
+            // Offset so non-AC products continue the SKU sequence after the
+            // air conditioners instead of reusing AC-00001 through AC-00010.
+            $this->seedProduct($name, $index + count(self::AIR_CONDITIONERS), $category->id, $seeded);
         }
 
         // Flag a few newly seeded products below their reorder level so
@@ -102,18 +134,38 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * Air-conditioner products land in the Air Conditioners category; the
-     * remaining products are assigned round-robin across all categories.
+     * Create a seeded product under a deterministic SKU, copying its image
+     * onto the public disk when one is defined for it.
      *
-     * @param  Collection<int, Category>  $categories
+     * @param  Collection<int, Product>  $seeded
      */
-    private function categoryIdFor(string $name, Collection $categories, int $index): int
+    private function seedProduct(string $name, int $index, int $categoryId, Collection $seeded): Product
     {
-        $category = isset(self::PRODUCT_IMAGES[$name])
-            ? $categories->firstWhere('name', 'Air Conditioners')
-            : null;
+        $sku = sprintf('AC-%05d', $index + 1);
 
-        return ($category ?? $categories[$index % $categories->count()])->id;
+        $image = self::PRODUCT_IMAGES[$name] ?? null;
+        $imagePath = $image === null ? null : $this->storeImage($sku, $image);
+
+        $product = Product::query()->firstOrCreate(
+            ['sku' => $sku],
+            Product::factory()->raw([
+                'sku' => $sku,
+                'name' => $name,
+                'category_id' => $categoryId,
+                'image_path' => $imagePath,
+            ]),
+        );
+
+        // Backfill the image on products that were seeded before images existed.
+        if ($imagePath !== null && $product->image_path === null) {
+            $product->update(['image_path' => $imagePath]);
+        }
+
+        if ($product->wasRecentlyCreated) {
+            $seeded->push($product);
+        }
+
+        return $product;
     }
 
     /**

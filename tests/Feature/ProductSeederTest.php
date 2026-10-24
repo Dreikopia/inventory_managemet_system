@@ -13,7 +13,7 @@ it('seeds products with images copied onto the public disk', function () {
 
     $products = Product::query()->whereNotNull('image_path')->get();
 
-    expect($products)->toHaveCount(5);
+    expect($products)->toHaveCount(10);
 
     foreach ($products as $product) {
         expect($product->image_path)
@@ -22,6 +22,31 @@ it('seeds products with images copied onto the public disk', function () {
 
         Storage::disk('public')->assertExists($product->image_path);
     }
+});
+
+it('seeds twenty products split evenly between air conditioners and other categories', function () {
+    Storage::fake('public');
+
+    $this->seed(CategorySeeder::class);
+    $this->seed(ProductSeeder::class);
+
+    expect(Product::query()->count())->toBe(20)
+        ->and(Product::query()->whereNull('image_path')->count())->toBe(10);
+
+    $nonAirConditionerProducts = Product::query()
+        ->whereNull('image_path')
+        ->whereRelation('category', 'name', '!=', 'Air Conditioners')
+        ->get();
+
+    expect($nonAirConditionerProducts)->toHaveCount(10)
+        ->and($nonAirConditionerProducts->pluck('category.name')->unique()->sort()->values()->all())->toBe([
+            'Air Filters',
+            'Air Purifiers',
+            'Ductwork',
+            'HEPA Filters',
+            'HVAC Parts',
+            'Thermostats',
+        ]);
 });
 
 it('assigns image products to the Air Conditioners category', function () {
