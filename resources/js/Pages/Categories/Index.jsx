@@ -17,7 +17,7 @@ const Index = ({ categories }) => {
 
     return (
 
-        <div className='space-y-6'>
+        <div className='p-6 space-y-4'>
             <div className='flex justify-between items-center'>
                 <div>
                     <h1 className="text-2xl font-bold">
@@ -43,7 +43,7 @@ const Index = ({ categories }) => {
                 </div>
             </div>
 
-            <div className='rounded-lg border bg-muted'>
+            <div className='rounded-md border bg-muted'>
                 <Table>
                     <TableHeader>
                         <TableRow>

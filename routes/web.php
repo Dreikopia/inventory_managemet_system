@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -26,4 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories');
     Route::post('/categories', [CategoryController::class, 'store'])->name('category.store');
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('category.update');
+
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::patch('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
 });

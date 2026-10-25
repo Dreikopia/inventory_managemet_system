@@ -31,7 +31,7 @@ const navGroups = [
             { title: 'Products', href: '/products', icon: Package },
 
             { title: 'category', href: '/categories', icon: Tag },
-            { title: 'Suppliers', href: '/supplier', icon: TruckIcon },
+            { title: 'Suppliers', href: '/suppliers', icon: TruckIcon },
 
         ],
     },
