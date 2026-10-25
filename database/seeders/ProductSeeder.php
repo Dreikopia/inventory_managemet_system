@@ -128,7 +128,7 @@ class ProductSeeder extends Seeder
         // low-stock behaviour can be exercised against seeded data.
         $seeded->random(min(3, $seeded->count()))->each(function (Product $product) {
             $product->update([
-                'in_stock' => fake()->numberBetween(0, $product->reorder_level),
+                'current_stock' => fake()->numberBetween(0, $product->reorder_level),
             ]);
         });
     }

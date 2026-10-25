@@ -23,7 +23,7 @@ class ProductFactory extends Factory
             'name' => ucwords(fake()->unique()->words(3, true)),
             'sku' => strtoupper(fake()->unique()->bothify('AC-#####')),
             'category_id' => Category::factory(),
-            'in_stock' => fake()->numberBetween(0, 500),
+            'current_stock' => fake()->numberBetween(0, 500),
             'unit_price' => fake()->randomFloat(2, 5, 500),
             'reorder_level' => fake()->numberBetween(3, 20),
         ];
@@ -35,7 +35,7 @@ class ProductFactory extends Factory
     public function lowStock(): static
     {
         return $this->state(fn (array $attributes) => [
-            'in_stock' => fake()->numberBetween(0, $attributes['reorder_level']),
+            'current_stock' => fake()->numberBetween(0, $attributes['reorder_level']),
         ]);
     }
 

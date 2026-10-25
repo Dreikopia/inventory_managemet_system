@@ -27,7 +27,8 @@ class Product extends Model
         'image_path',
         'sku',
         'category_id',
-        'in_stock',
+        'supplier_id',
+        'current_stock',
         'unit_price',
         'reorder_level',
     ];
@@ -42,7 +43,7 @@ class Product extends Model
     protected function stockStatus(): Attribute
     {
         return Attribute::get(function (): array {
-            $status = StockStatus::fromStockLevels($this->in_stock, $this->reorder_level);
+            $status = StockStatus::fromStockLevels($this->current_stock, $this->reorder_level);
 
             return ['value' => $status->value, 'label' => $status->label()];
         });
@@ -51,5 +52,10 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

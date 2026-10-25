@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -19,14 +20,16 @@ class ProductController extends Controller
     public function index()
     {
         return Inertia::render('Products/Index', [
-            'products' => Product::with('category')->latest()->get(),
+            'products' => Product::with(['category', 'supplier'])->latest()->get(),
             'categories' => Category::orderBy('name')->get(),
+            'suppliers' => Supplier::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function store(StoreProductRequest $request)
     {
         $validated = $request->validated();
+
         if ($request->hasFile('image')) {
             $validated['image_path'] = $request->file('image')->store('images/products', 'public');
         }

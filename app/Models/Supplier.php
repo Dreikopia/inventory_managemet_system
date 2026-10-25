@@ -10,8 +10,12 @@ class Supplier extends Model
         'name', 'contact_person', 'phone', 'email', 'address', 'is_active',
     ];
 
-     protected $casts = [
+    protected $casts = [
         'is_active' => 'boolean',
     ];
-    
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

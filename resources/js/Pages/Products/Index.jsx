@@ -4,7 +4,7 @@ import ProductFormDrawer from '@/components/product-form-drawer';
 import { Button } from '@/components/ui/button';
 import ProductRow from '@/components/product-row';
 
-const Index = ({ products, categories }) => {
+const Index = ({ products, categories, suppliers }) => {
   const [drawer, setDrawer] = useState({ open: false, product: null });
 
   const openCreate = () => setDrawer({ open: true, product: null });
@@ -49,6 +49,7 @@ const Index = ({ products, categories }) => {
         onOpenChange={(open) => setDrawer((current) => ({ ...current, open }))}
         product={drawer.product}
         categories={categories}
+        suppliers={suppliers}
       />
     </>
   );

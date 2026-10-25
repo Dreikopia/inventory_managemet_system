@@ -34,7 +34,7 @@ class UpdateProductRequest extends FormRequest
                 Rule::unique('products', 'sku')->ignore($this->route('product')),
             ],
             'category_id' => ['required', 'exists:categories,id'],
-            'in_stock' => ['required', 'integer', 'min:0'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'unit_price' => ['required', 'numeric', 'min:0'],
             'reorder_level' => ['required', 'integer', 'min:0'],
         ];

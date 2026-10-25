@@ -1,6 +1,8 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useLayoutEffect, useState } from 'react';
-
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Sheet,
     SheetContent,
@@ -9,11 +11,6 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-
 import {
     Select,
     SelectContent,
@@ -36,7 +33,8 @@ const emptyForm = () => ({
     name: '',
     sku: '',
     category_id: '',
-    in_stock: '',
+    supplier_id: '',
+    unit_price: '',
     reorder_level: '',
     image: null,
     remove_image: false,
@@ -46,14 +44,14 @@ const formFor = (product) => ({
     name: product.name ?? '',
     sku: product.sku ?? '',
     category_id: product.category_id ? String(product.category_id) : '',
-    in_stock: product.in_stock ?? '',
+    supplier_id: product.supplier_id ? String(product.supplier_id) : '',
     unit_price: product.unit_price ?? '',
     reorder_level: product.reorder_level ?? '',
     image: null,
     remove_image: false,
 });
 
-const ProductFormDrawer = ({ open, onOpenChange, product, categories }) => {
+const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers }) => {
     const isEdit = Boolean(product);
 
     const { data, setData, post, put, processing, errors, recentlySuccessful } =
@@ -239,30 +237,59 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories }) => {
                                 />
                             </Field>
 
-                            <Field label="Category" htmlFor="category" error={errors.category_id}>
-                                <Select
-                                    value={data.category_id}
-                                    onValueChange={(value) =>
-                                        setData('category_id', value === null ? '' : String(value))
-                                    }
-                                    items={categories.map((c) => ({ value: String(c.id), label: c.name }))}
-                                >
-                                    <SelectTrigger
-                                        id="category"
-                                        className="w-full"
-                                        aria-invalid={Boolean(errors.category_id)}
+                            <div className="grid gird-cols-2">
+                                <Field label="Category" htmlFor="category" error={errors.category_id}>
+                                    <Select
+                                        value={data.category_id}
+                                        onValueChange={(value) =>
+                                            setData('category_id', value === null ? '' : String(value))
+                                        }
+                                        items={categories.map((c) => ({ value: String(c.id), label: c.name }))}
                                     >
-                                        <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={String(category.id)}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </Field>
+                                        <SelectTrigger
+                                            id="category"
+                                            className="w-full"
+                                            aria-invalid={Boolean(errors.category_id)}
+                                        >
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {categories.map((category) => (
+                                                <SelectItem key={category.id} value={String(category.id)}>
+                                                    {category.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+
+                                <Field label="Supplier" htmlFor="supplier" error={errors.supplier_id}>
+
+                                    <Select
+                                        value={data.supplier_id || null}
+                                        onValueChange={(value) => setData('supplier_id', value == null ? '' : String(value))}
+                                        items={suppliers.map((s) => ({ value: String(s.id), label: s.name }))}
+                                    >
+
+                                        <SelectTrigger
+                                            id="supplier_id"
+                                            className="w-full"
+                                            aria-invalid={Boolean(errors.supplier_id)}
+                                        >
+                                            <SelectValue placeholder="Select a supplier" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {suppliers.map((supplier) => (
+                                                <SelectItem key={supplier.id}
+                                                    value={String(supplier.id)}
+                                                >
+                                                    {supplier.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+                            </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <Field label="Unit price" htmlFor="unit_price" error={errors.unit_price}>
@@ -279,19 +306,6 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories }) => {
                                     />
                                 </Field>
 
-                                <Field label="In stock" htmlFor="in_stock" error={errors.in_stock}>
-                                    <Input
-                                        id="in_stock"
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        value={data.in_stock}
-                                        onChange={(e) => setData('in_stock', e.target.value)}
-                                        placeholder="128"
-                                        aria-invalid={Boolean(errors.in_stock)}
-                                        disabled={processing}
-                                    />
-                                </Field>
                             </div>
 
                             <Field
@@ -311,6 +325,9 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories }) => {
                                     disabled={processing}
                                 />
                             </Field>
+
+
+
                         </div>
                     </div>
 

@@ -27,7 +27,7 @@ class StoreProductRequest extends FormRequest
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'sku' => ['required', 'string', 'max:255', 'unique:products,sku'],
             'category_id' => ['required', 'exists:categories,id'],
-            'in_stock' => ['required', 'integer', 'min:0'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'unit_price' => ['required', 'numeric', 'min:0'],
             'reorder_level' => ['required', 'integer', 'min:0'],
         ];
