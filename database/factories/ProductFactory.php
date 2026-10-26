@@ -23,7 +23,6 @@ class ProductFactory extends Factory
             'name' => ucwords(fake()->unique()->words(3, true)),
             'sku' => strtoupper(fake()->unique()->bothify('AC-#####')),
             'category_id' => Category::factory(),
-            'current_stock' => fake()->numberBetween(0, 500),
             'unit_price' => fake()->randomFloat(2, 5, 500),
             'reorder_level' => fake()->numberBetween(3, 20),
         ];

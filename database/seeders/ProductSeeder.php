@@ -135,13 +135,6 @@ class ProductSeeder extends Seeder
         // supplier relationships can be exercised against seeded data.
         $this->associateSuppliers($seeded, $suppliers);
 
-        // Flag a few newly seeded products below their reorder level so
-        // low-stock behaviour can be exercised against seeded data.
-        $seeded->random(min(3, $seeded->count()))->each(function (Product $product) {
-            $product->update([
-                'current_stock' => fake()->numberBetween(0, $product->reorder_level),
-            ]);
-        });
     }
 
     /**

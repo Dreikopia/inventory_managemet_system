@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * Attributes that are computed rather than stored on the table.
@@ -43,7 +46,10 @@ class Product extends Model
     protected function stockStatus(): Attribute
     {
         return Attribute::get(function (): array {
-            $status = StockStatus::fromStockLevels($this->current_stock, $this->reorder_level);
+
+            $quantity = $this->inventory?->quantity ?? 0;
+
+            $status = StockStatus::fromStockLevels($quantity, $this->reorder_level);
 
             return ['value' => $status->value, 'label' => $status->label()];
         });
@@ -57,5 +63,10 @@ class Product extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function inventory()
+    {
+        return $this->hasOne(Inventory::class);
     }
 }
