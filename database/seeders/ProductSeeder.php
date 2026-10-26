@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -110,6 +111,12 @@ class ProductSeeder extends Seeder
             return;
         }
 
+        $suppliers = Supplier::query()->orderBy('id')->get();
+
+        if ($suppliers->isEmpty()) {
+            $this->command?->warn('No suppliers found — run SupplierSeeder first.');
+        }
+
         $seeded = collect();
 
         foreach (self::AIR_CONDITIONERS as $index => $name) {
@@ -123,6 +130,10 @@ class ProductSeeder extends Seeder
             // air conditioners instead of reusing AC-00001 through AC-00010.
             $this->seedProduct($name, $index + count(self::AIR_CONDITIONERS), $category->id, $seeded);
         }
+
+        // Associate 70% of the newly seeded products with suppliers so
+        // supplier relationships can be exercised against seeded data.
+        $this->associateSuppliers($seeded, $suppliers);
 
         // Flag a few newly seeded products below their reorder level so
         // low-stock behaviour can be exercised against seeded data.
@@ -166,6 +177,29 @@ class ProductSeeder extends Seeder
         }
 
         return $product;
+    }
+
+    /**
+     * Associate 70% of the newly seeded products with a supplier, assigned
+     * round-robin across the available suppliers in seeding order. Products
+     * seeded before suppliers existed are left untouched on repeat runs.
+     *
+     * @param  Collection<int, Product>  $seeded
+     * @param  Collection<int, Supplier>  $suppliers
+     */
+    private function associateSuppliers(Collection $seeded, Collection $suppliers): void
+    {
+        if ($seeded->isEmpty() || $suppliers->isEmpty()) {
+            return;
+        }
+
+        $seeded
+            ->take((int) ceil($seeded->count() * 0.7))
+            ->each(function (Product $product, int $slot) use ($suppliers): void {
+                $product->update([
+                    'supplier_id' => $suppliers[$slot % $suppliers->count()]->id,
+                ]);
+            });
     }
 
     /**

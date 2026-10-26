@@ -81,6 +81,13 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
         }
     };
 
+    const supplierLabels = Object.fromEntries(
+        suppliers.map((supplier) => [String(supplier.id), supplier.name]),
+    );
+    const categoryLabels = Object.fromEntries(
+        categories.map((category) => [String(category.id), category.name]),
+    );
+
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
@@ -179,6 +186,7 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                         onValueChange={(value) =>
                                             setData('category_id', value === null ? '' : String(value))
                                         }
+                                        items={categoryLabels}
                                     >
                                         <SelectTrigger
                                             id="category"
@@ -202,6 +210,7 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                     <Select
                                         value={data.supplier_id || null}
                                         onValueChange={(value) => setData('supplier_id', value == null ? '' : String(value))}
+                                        items={supplierLabels}
                                     >
 
                                         <SelectTrigger
@@ -250,7 +259,7 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                         step="1"
                                         value={data.reorder_level}
                                         onChange={(e) => setData('reorder_level', e.target.value)}
-                                        placeholder="15"
+                                        placeholder="Minimum stock before reorder"
                                         aria-invalid={Boolean(errors.reorder_level)}
                                         disabled={processing}
                                     />

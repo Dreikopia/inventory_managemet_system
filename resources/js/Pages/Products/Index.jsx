@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
 import ProductFormDrawer from '@/components/product-form-drawer';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,8 @@ import ProductRow from '@/components/product-row';
 const Index = ({ products, categories, suppliers }) => {
   const [drawer, setDrawer] = useState({ open: false, product: null });
 
-  const openCreate = () => setDrawer({ open: true, product: null });
-  const openEdit = (product) => setDrawer({ open: true, product });
+  const openCreate = useCallback(() => setDrawer({ open: true, product: null }), []);
+  const openEdit = useCallback((product) => setDrawer({ open: true, product }), []);
 
   return (
     <>

@@ -25,7 +25,7 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['sometimes', 'boolean'],
             'sku' => [
                 'required',
@@ -37,6 +37,18 @@ class UpdateProductRequest extends FormRequest
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'unit_price' => ['required', 'numeric', 'min:0'],
             'reorder_level' => ['required', 'integer', 'min:0'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'image.max' => 'The image must be 2 MB or smaller.',
         ];
     }
 }

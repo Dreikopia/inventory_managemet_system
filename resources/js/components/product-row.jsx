@@ -1,4 +1,5 @@
 import { Image as ImageIcon } from 'lucide-react';
+import { memo } from 'react';
 import ProductRowActions from '@/components/product-row-actions';
 import { cn } from 'cn';
 
@@ -18,6 +19,8 @@ export const ProductThumbnail = ({ product, className }) =>
     <img
       src={product.image_url}
       alt=""
+      loading="lazy"
+      decoding="async"
       className={cn('size-12 shrink-0 rounded-lg object-cover', className)}
     />
   ) : (
@@ -32,7 +35,7 @@ export const ProductThumbnail = ({ product, className }) =>
     </div>
   );
 
-const ProductRow = ({ product, className, onEdit, onDelete }) => (
+const ProductRow = memo(({ product, className, onEdit, onDelete }) => (
   <li
     className={cn(
       'flex items-center gap-4 p-3 transition-colors',
@@ -81,6 +84,6 @@ const ProductRow = ({ product, className, onEdit, onDelete }) => (
       <ProductRowActions product={product} onEdit={onEdit} onDelete={onDelete} />
     </div>
   </li>
-);
+));
 
 export default ProductRow;

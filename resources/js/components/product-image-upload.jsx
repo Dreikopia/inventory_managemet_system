@@ -4,7 +4,7 @@ import { Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 const ACCEPT = "image/jpeg,image/png,image/webp";
 
 export function ProductImageUpload({
@@ -42,7 +42,7 @@ export function ProductImageUpload({
             }
 
             if (file.size > MAX_FILE_SIZE) {
-                setError("Image must be 10 MB or smaller.");
+                setError("Image must be 2 MB or smaller.");
                 return;
             }
 
@@ -117,7 +117,7 @@ export function ProductImageUpload({
                                 Drop an image or click to browse
                             </p>
                             <p className="mt-0.5 text-xs text-muted-foreground">
-                                PNG, JPG or WebP, up to 10 MB
+                                PNG, JPG or WebP, up to 2 MB
                             </p>
                         </div>
 
