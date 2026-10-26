@@ -18,8 +18,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { AttachmentUpload } from './motion/attachment-upload';
 import { ProductThumbnail } from './product-row';
+import { ProductImageUpload } from './product-image-upload';
+import { ProductImageLightbox } from './product-image-lightbox';
 
 const Field = ({ label, htmlFor, error, className = '', children }) => (
     <div className={`grid gap-1.5 ${className}`}>
@@ -57,15 +58,11 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
     const { data, setData, post, put, processing, errors, recentlySuccessful } =
         useForm(emptyForm());
 
-    const [attachment, setAttachment] = useState(null);
-    const [imageError, setImageError] = useState(null);
-    const [imageRemoved, setImageRemoved] = useState(false);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxSrc, setLightboxSrc] = useState(undefined);
 
     useLayoutEffect(() => {
         setData(product ? formFor(product) : emptyForm());
-        setAttachment(null);
-        setImageError(null);
-        setImageRemoved(false);
     }, [open, product]);
 
     useEffect(() => {
@@ -73,30 +70,6 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
             onOpenChange(false);
         }
     }, [recentlySuccessful]);
-
-    const selectImage = (items) => {
-        const selected = items[0] ?? null;
-
-        setAttachment(selected);
-        setData('image', selected?.file ?? null);
-        setImageError(null);
-
-        // Picking a file supersedes an earlier request to drop the saved image.
-        if (selected) {
-            setImageRemoved(false);
-            setData('remove_image', false);
-        }
-    };
-
-    const removeSavedImage = () => {
-        setImageRemoved(true);
-        setData('remove_image', true);
-    };
-
-    const undoRemoveSavedImage = () => {
-        setImageRemoved(false);
-        setData('remove_image', false);
-    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -107,9 +80,6 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
             post('/products', { forceFormData: true });
         }
     };
-
-    const showSavedImage = isEdit && product.image_url && !imageRemoved && !attachment;
-    const showRemovalNote = isEdit && product.image_url && imageRemoved && !attachment;
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -142,9 +112,42 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                     )}
                 </SheetHeader>
 
+
                 <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
                     <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-                        <div className="grid gap-3">
+
+                        <Field
+                            label="Product image"
+                            htmlFor="product-image"
+                            error={errors.image}
+                        >
+                            <ProductImageUpload
+                                id="product-image"
+                                value={data.image}
+                                onValueChange={(file) => {
+                                    setData('image', file);
+                                    setData('remove_image', false);
+                                }}
+                                src={
+                                    isEdit &&
+                                        product.image_url &&
+                                        !data.image &&
+                                        !data.remove_image
+                                        ? product.image_url
+                                        : undefined
+                                }
+                                onRemove={() => {
+                                    setData('image', null);
+                                    setData('remove_image', true);
+                                }}
+                                onView={(src) => {
+                                    setLightboxSrc(src);
+                                    setLightboxOpen(true);
+                                }}
+                                disabled={processing}
+                            />
+                        </Field>
+                        <div className="grid gap-3 mt-2">
                             <Field label="Product name" htmlFor="name" error={errors.name}>
                                 <Input
                                     id="name"
@@ -167,84 +170,15 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                 />
                             </Field>
 
-                            <Field
-                                label="Product image"
-                                htmlFor="product-image"
-                                error={imageError ?? errors.image}
-                            >
-                                {showSavedImage && (
-                                    <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-muted/40 p-2">
-                                        <img
-                                            src={product.image_url}
-                                            alt=""
-                                            className="size-11 shrink-0 rounded-lg object-cover"
-                                        />
-                                        <p className="min-w-0 flex-1 truncate text-sm">
-                                            Current image
-                                        </p>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={removeSavedImage}
-                                            disabled={processing}
-                                        >
-                                            Remove
-                                        </Button>
-                                    </div>
-                                )}
 
-                                {showRemovalNote && (
-                                    <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 px-3 py-2">
-                                        <p className="text-xs text-destructive">
-                                            The image is removed when you save.
-                                        </p>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="xs"
-                                            onClick={undoRemoveSavedImage}
-                                            disabled={processing}
-                                        >
-                                            Undo
-                                        </Button>
-                                    </div>
-                                )}
 
-                                <AttachmentUpload
-                                    id="product-image"
-                                    value={attachment ? [attachment] : []}
-                                    onValueChange={selectImage}
-                                    onFilesRejected={(files, reason) => {
-                                        setImageError(
-                                            reason === 'too-large'
-                                                ? 'Image must be 10 MB or smaller.'
-                                                : 'Please select a valid image.',
-                                        );
-                                    }}
-                                    accept="image/jpeg,image/png,image/webp"
-                                    multiple={false}
-                                    maxFiles={1}
-                                    maxFileSize={10 * 1024 * 1024}
-                                    title={
-                                        showSavedImage
-                                            ? 'Drop a new image or click to browse'
-                                            : 'Drop an image or click to browse'
-                                    }
-                                    description="PNG, JPG or WebP, up to 10 MB"
-                                    classNames={{ dropzone: 'min-h-32 rounded-xl p-4' }}
-                                    disabled={processing}
-                                />
-                            </Field>
-
-                            <div className="grid gird-cols-2">
+                            <div className="grid grid-cols-2 gap-3">
                                 <Field label="Category" htmlFor="category" error={errors.category_id}>
                                     <Select
                                         value={data.category_id}
                                         onValueChange={(value) =>
                                             setData('category_id', value === null ? '' : String(value))
                                         }
-                                        items={categories.map((c) => ({ value: String(c.id), label: c.name }))}
                                     >
                                         <SelectTrigger
                                             id="category"
@@ -268,7 +202,6 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                     <Select
                                         value={data.supplier_id || null}
                                         onValueChange={(value) => setData('supplier_id', value == null ? '' : String(value))}
-                                        items={suppliers.map((s) => ({ value: String(s.id), label: s.name }))}
                                     >
 
                                         <SelectTrigger
@@ -291,7 +224,7 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                 </Field>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-4 mt-2">
                                 <Field label="Unit price" htmlFor="unit_price" error={errors.unit_price}>
                                     <Input
                                         id="unit_price"
@@ -305,29 +238,25 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                                         disabled={processing}
                                     />
                                 </Field>
+                                <Field
+                                    label="Reorder level"
+                                    htmlFor="reorder_level"
+                                    error={errors.reorder_level}
+                                >
+                                    <Input
+                                        id="reorder_level"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        value={data.reorder_level}
+                                        onChange={(e) => setData('reorder_level', e.target.value)}
+                                        placeholder="15"
+                                        aria-invalid={Boolean(errors.reorder_level)}
+                                        disabled={processing}
+                                    />
+                                </Field>
 
                             </div>
-
-                            <Field
-                                label="Reorder level"
-                                htmlFor="reorder_level"
-                                error={errors.reorder_level}
-                            >
-                                <Input
-                                    id="reorder_level"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    value={data.reorder_level}
-                                    onChange={(e) => setData('reorder_level', e.target.value)}
-                                    placeholder="15"
-                                    aria-invalid={Boolean(errors.reorder_level)}
-                                    disabled={processing}
-                                />
-                            </Field>
-
-
-
                         </div>
                     </div>
 
@@ -351,8 +280,14 @@ const ProductFormDrawer = ({ open, onOpenChange, product, categories, suppliers 
                         </Button>
                     </SheetFooter>
                 </form>
-            </SheetContent>
-        </Sheet>
+                <ProductImageLightbox
+                    open={lightboxOpen}
+                    onOpenChange={setLightboxOpen}
+                    src={lightboxSrc}
+                    alt="Product Image"
+                />
+            </SheetContent >
+        </Sheet >
     );
 };
 
