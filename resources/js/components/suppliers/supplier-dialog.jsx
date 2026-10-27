@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useForm } from "@inertiajs/react";
-import { Label } from './ui/label';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 import {
     Dialog,
@@ -10,8 +10,8 @@ import {
     DialogDescription,
     DialogFooter,
     DialogHeader,
-} from './ui/dialog';
-import { Textarea } from './ui/textarea';
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 
 const SupplierDialog = ({ open, onOpenChange, supplier = null }) => {

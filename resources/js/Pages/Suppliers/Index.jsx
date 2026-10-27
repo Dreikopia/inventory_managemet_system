@@ -1,4 +1,4 @@
-import SupplierDialog from "@/components/supplier-dialog";
+import SupplierDialog from "@/components/suppliers/supplier-dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import AppLayout from "@/Layouts/AppLayout";

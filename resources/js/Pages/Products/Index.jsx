@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import AppLayout from '@/Layouts/AppLayout';
-import ProductFormDrawer from '@/components/product-form-drawer';
+import ProductFormDrawer from '@/components/products/product-form-drawer';
 import { Button } from '@/components/ui/button';
-import ProductRow from '@/components/product-row';
+import ProductRow from '@/components/products/product-row';
 
 const Index = ({ products, categories, suppliers }) => {
   const [drawer, setDrawer] = useState({ open: false, product: null });

@@ -2,10 +2,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/Layouts/AppLayout';
-import CategoryFormModal from '@/components/category-form-modal';
+import CategoryFormModal from '@/components/categories/category-form-modal';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import CategoryRowActions from '@/components/category-row-actions';
+import CategoryRowActions from '@/components/categories/category-row-actions';
 
 const Index = ({ categories }) => {
 

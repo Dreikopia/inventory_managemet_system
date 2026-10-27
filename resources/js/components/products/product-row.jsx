@@ -1,6 +1,6 @@
 import { Image as ImageIcon } from 'lucide-react';
 import { memo } from 'react';
-import ProductRowActions from '@/components/product-row-actions';
+import ProductRowActions from '@/components/products/product-row-actions';
 import { cn } from 'cn';
 
 const currency = new Intl.NumberFormat('en-PH', {
