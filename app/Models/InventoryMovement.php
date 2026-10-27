@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\MovementType;
 use Illuminate\Database\Eloquent\Model;
 
 class InventoryMovement extends Model
 {
     protected $fillable = [
-        'inventory_movements',
+        'inventory_id',
         'user_id',
         'type',
         'quantity',
         'remarks',
+    ];
+
+    protected $casts = [
+        'type' => MovementType::class,
     ];
 
     public function inventory()

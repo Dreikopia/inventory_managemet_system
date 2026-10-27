@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -31,4 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers');
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
     Route::patch('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+
+    Route::post('/inventories/{inventory}/stock-in', [InventoryMovementController::class, 'stockIn'])->name('stock-in');
+    Route::post('/inventories/{inventory}/stock-out', [InventoryMovementController::class, 'stockOut'])->name('stock-out');
+    Route::post('/inventories/{inventory}/adjustment', [InventoryMovementController::class, 'adjustment'])->name('adjustment');
 });
