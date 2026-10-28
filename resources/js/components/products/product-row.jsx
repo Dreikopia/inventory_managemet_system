@@ -1,39 +1,13 @@
-import { Image as ImageIcon } from 'lucide-react';
 import { memo } from 'react';
 import ProductRowActions from '@/components/products/product-row-actions';
+import ProductThumbnail from '@/components/products/product-thumbnail';
+import StockStatusBadge from '@/components/products/status-badge';
 import { cn } from 'cn';
 
 const currency = new Intl.NumberFormat('en-PH', {
   style: 'currency',
   currency: 'PHP',
 });
-
-const statusStyles = {
-  active: 'bg-green-500/15 text-green-700 dark:text-green-400',
-  low_stock: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
-  out_of_stock: 'bg-destructive/15 text-destructive',
-};
-
-export const ProductThumbnail = ({ product, className }) =>
-  product.image_url ? (
-    <img
-      src={product.image_url}
-      alt=""
-      loading="lazy"
-      decoding="async"
-      className={cn('size-12 shrink-0 rounded-lg object-cover', className)}
-    />
-  ) : (
-    <div
-      className={cn(
-        'flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground',
-        className,
-      )}
-      aria-hidden="true"
-    >
-      <ImageIcon className="size-5" />
-    </div>
-  );
 
 const ProductRow = memo(({ product, className, onEdit, onDelete }) => (
   <li
@@ -63,14 +37,7 @@ const ProductRow = memo(({ product, className, onEdit, onDelete }) => (
         <span aria-hidden="true">·</span>
         <span className="tabular-nums">{product.in_stock} in stock</span>
 
-        <span
-          className={cn(
-            'rounded-full px-2 py-0.5 font-medium',
-            statusStyles[product.stock_status.value] ?? statusStyles.active,
-          )}
-        >
-          {product.stock_status.label}
-        </span>
+        <StockStatusBadge status={product.stock_status} />
       </div>
     </div>
 

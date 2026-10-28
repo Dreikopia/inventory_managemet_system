@@ -18,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ProductThumbnail } from './product-row';
+import ProductThumbnail from './product-thumbnail';
 import { ProductImageUpload } from './product-image-upload';
 import { ProductImageLightbox } from './product-image-lightbox';
 

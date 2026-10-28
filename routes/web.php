@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
@@ -33,7 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
     Route::patch('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
 
+    Route::get('/inventories', [InventoryController::class, 'index'])->name('inventories');
+
     Route::post('/inventories/{inventory}/stock-in', [InventoryMovementController::class, 'stockIn'])->name('stock-in');
     Route::post('/inventories/{inventory}/stock-out', [InventoryMovementController::class, 'stockOut'])->name('stock-out');
     Route::post('/inventories/{inventory}/adjustment', [InventoryMovementController::class, 'adjustment'])->name('adjustment');
+
 });

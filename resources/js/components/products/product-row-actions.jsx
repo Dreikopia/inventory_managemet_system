@@ -24,15 +24,8 @@ const ProductRowActions = ({ product, onEdit, onDelete }) => {
           Edit
         </DropdownMenuItem>
 
-        {/* TODO: stock adjustment route not built yet. */}
-        <DropdownMenuItem>
-          <SlidersHorizontal />
-          Adjust stock
-        </DropdownMenuItem>
-
         <DropdownMenuSeparator />
 
-        {/* TODO: soft delete — API endpoint not built yet. */}
         <DropdownMenuItem variant="destructive" onClick={() => onDelete?.(product)}>
           <Trash />
           Delete

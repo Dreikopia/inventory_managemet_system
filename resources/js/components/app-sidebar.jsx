@@ -29,7 +29,6 @@ const navGroups = [
         label: 'Catalog',
         items: [
             { title: 'Products', href: '/products', icon: Package },
-
             { title: 'category', href: '/categories', icon: Tag },
             { title: 'Suppliers', href: '/suppliers', icon: TruckIcon },
 
@@ -39,8 +38,8 @@ const navGroups = [
     {
         label: 'Management',
         items: [
-            { title: 'Inventory', href: '/Inventory', icon: Boxes },
-            { title: 'Movements', href: '/Movements', icon: ArrowLeftRight },
+            { title: 'Inventory', href: '/inventories', icon: Boxes },
+            { title: 'Movements', href: '/movements', icon: ArrowLeftRight },
         ],
     },
 ];
