@@ -14,6 +14,7 @@ import { Minus, Plus } from 'lucide-react';
 import ProductThumbnail from '../products/product-thumbnail';
 import StockStatusBadge from '../products/status-badge';
 import { Textarea } from '../ui/textarea';
+import MovementTypeBadge from '../movements/movement-type-badge';
 
 const Field = ({ label, htmlFor, error, className = '', children }) => (
     <div className={`grid gap-1.5 ${className}`}>
@@ -55,13 +56,6 @@ const MODES = {
         processingLabel: 'Saving…',
     },
 };
-
-const TYPE_LABELS = {
-    stock_in: 'Stock in',
-    stock_out: 'Stock out',
-    adjustment: 'Adjustment',
-};
-
 
 const signed = (n) => (n >= 0 ? `+${n}` : `${n}`);
 
@@ -339,8 +333,7 @@ const StockFormDrawer = ({ open, onOpenChange, inventory, initialMode = 'in', pr
                                                     {formatDate(movement.created_at)}
                                                 </span>
                                                 <span className="flex-1">
-                                                    {TYPE_LABELS[movement.type] ??
-                                                        movement.type}
+                                                    <MovementTypeBadge type={movement.type} />
                                                 </span>
                                                 <span
                                                     className={`font-medium tabular-nums ${movement.quantity > 0
