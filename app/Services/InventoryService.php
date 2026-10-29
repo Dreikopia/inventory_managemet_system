@@ -15,11 +15,11 @@ class InventoryService
      *
      * @throws ValidationException
      */
-    public function stockIn(Inventory $inventory, int $quantity, ?int $userId = null, ?string $remarks = null): InventoryMovement
+    public function stockIn(Inventory $inventory, int $quantity, ?int $userId = null, ?string $remarks = null, ?int $saleId = null): InventoryMovement
     {
         $this->ensurePositive($quantity);
 
-        return $this->applyChange($inventory, MovementType::STOCK_IN, $quantity, $userId, $remarks);
+        return $this->applyChange($inventory, MovementType::STOCK_IN, $quantity, $userId, $saleId, $remarks);
     }
 
     /**
@@ -27,11 +27,11 @@ class InventoryService
      *
      * @throws ValidationException
      */
-    public function stockOut(Inventory $inventory, int $quantity, ?int $userId = null, ?string $remarks = null): InventoryMovement
+    public function stockOut(Inventory $inventory, int $quantity, ?int $userId = null, ?string $remarks = null, ?int $saleId = null): InventoryMovement
     {
         $this->ensurePositive($quantity);
 
-        return $this->applyChange($inventory, MovementType::STOCK_OUT, -$quantity, $userId, $remarks);
+        return $this->applyChange($inventory, MovementType::STOCK_OUT, -$quantity, $userId, $saleId, $remarks);
     }
 
     /**
@@ -47,7 +47,7 @@ class InventoryService
             ]);
         }
 
-        return $this->applyChange($inventory, MovementType::ADJUSTMENT, $change, $userId, $remarks);
+        return $this->applyChange($inventory, MovementType::ADJUSTMENT, $change, $userId, null, $remarks);
     }
 
     /**
@@ -69,9 +69,9 @@ class InventoryService
      *
      * @throws ValidationException
      */
-    private function applyChange(Inventory $inventory, MovementType $type, int $change, ?int $userId, ?string $remarks): InventoryMovement
+    private function applyChange(Inventory $inventory, MovementType $type, int $change, ?int $userId, ?int $saleId, ?string $remarks): InventoryMovement
     {
-        return DB::transaction(function () use ($inventory, $type, $change, $userId, $remarks): InventoryMovement {
+        return DB::transaction(function () use ($inventory, $type, $change, $userId, $saleId, $remarks): InventoryMovement {
             $locked = Inventory::query()->lockForUpdate()->findOrFail($inventory->id);
 
             $newQuantity = $locked->quantity + $change;
@@ -86,6 +86,7 @@ class InventoryService
 
             return $locked->movements()->create([
                 'user_id' => $userId,
+                'sale_id' => $saleId,
                 'type' => $type,
                 'quantity' => $change,
                 'remarks' => $remarks,

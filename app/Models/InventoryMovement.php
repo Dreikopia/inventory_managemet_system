@@ -9,6 +9,7 @@ class InventoryMovement extends Model
 {
     protected $fillable = [
         'inventory_id',
+        'sale_id',
         'user_id',
         'type',
         'quantity',
@@ -18,6 +19,11 @@ class InventoryMovement extends Model
     protected $casts = [
         'type' => MovementType::class,
     ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
 
     public function inventory()
     {

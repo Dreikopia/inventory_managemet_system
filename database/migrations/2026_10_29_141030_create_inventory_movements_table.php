@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Inventory;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('inventory_movements', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(Sale::class)->nullable()->constrained()->nullOnDelete();
             $table->foreignIdFor(Inventory::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('type', 20);

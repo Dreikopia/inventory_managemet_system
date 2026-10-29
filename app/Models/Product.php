@@ -54,6 +54,11 @@ class Product extends Model
         });
     }
 
+    public function saleItems()
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

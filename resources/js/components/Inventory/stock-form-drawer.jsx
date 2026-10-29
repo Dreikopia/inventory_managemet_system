@@ -303,7 +303,7 @@ const StockFormDrawer = ({ open, onOpenChange, inventory, initialMode = 'in', pr
                             </p>
 
                             <Field
-                                label="Remarks (optional)"
+                                label={mode === 'adjust' ? 'Remarks' : 'Remarks (optional)'}
                                 htmlFor="stock-remarks"
                                 error={errors.remarks}
                                 className="pb-1"
