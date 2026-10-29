@@ -40,4 +40,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/inventories/{inventory}/stock-out', [InventoryMovementController::class, 'stockOut'])->name('stock-out');
     Route::post('/inventories/{inventory}/adjustment', [InventoryMovementController::class, 'adjustment'])->name('adjustment');
 
+    Route::get('/movements', [InventoryMovementController::class, 'index'])->name('movements.index');
+
 });

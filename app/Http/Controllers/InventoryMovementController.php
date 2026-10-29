@@ -5,11 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AdjustStockRequest;
 use App\Http\Requests\StockMovementRequest;
 use App\Models\Inventory;
+use App\Models\InventoryMovement;
 use App\Services\InventoryService;
+use Inertia\Inertia;
 
 class InventoryMovementController extends Controller
 {
     public function __construct(private InventoryService $inventoryService) {}
+
+    public function index()
+    {
+        return Inertia::render('Movements/Index', [
+            'movements' => InventoryMovement::with([
+                'inventory.product',
+                'user',
+            ])->latest()->get(),
+        ]);
+    }
 
     public function stockIn(StockMovementRequest $request, Inventory $inventory)
     {

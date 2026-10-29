@@ -31,7 +31,6 @@ class Product extends Model
         'sku',
         'category_id',
         'supplier_id',
-        'current_stock',
         'unit_price',
         'reorder_level',
     ];
