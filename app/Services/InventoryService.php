@@ -84,6 +84,7 @@ class InventoryService
 
             $locked->update(['quantity' => $newQuantity]);
 
+            // create the movement history
             return $locked->movements()->create([
                 'user_id' => $userId,
                 'sale_id' => $saleId,

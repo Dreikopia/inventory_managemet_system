@@ -62,7 +62,7 @@ class InventoryMovementController extends Controller
             $inventory,
             $validated['quantity'],
             $request->user()->id,
-            $validated['remarks'],
+            $validated['remarks'] ?? null,
         );
 
         return back()->with('success', 'Stock adjusted');

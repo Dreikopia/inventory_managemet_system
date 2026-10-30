@@ -109,14 +109,19 @@ it('rejects an adjustment of zero', function () {
         ->and($this->inventory->movements()->count())->toBe(0);
 });
 
-it('requires remarks when adjusting stock', function () {
-    $response = $this->actingAs($this->user)->from('/products')->post(route('adjustment', $this->inventory), [
+it('allows an adjustment without remarks', function () {
+    $response = $this->actingAs($this->user)->post(route('adjustment', $this->inventory), [
         'quantity' => 5,
     ]);
 
-    $response->assertSessionHasErrors('remarks');
+    $response->assertRedirect();
 
-    expect($this->inventory->movements()->count())->toBe(0);
+    expect($this->inventory->fresh()->quantity)->toBe(55);
+
+    $movement = $this->inventory->movements()->sole();
+
+    expect($movement->type)->toBe(MovementType::ADJUSTMENT)
+        ->and($movement->remarks)->toBeNull();
 });
 
 it('requires a quantity for stock movements', function () {
