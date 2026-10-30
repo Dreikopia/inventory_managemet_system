@@ -76,7 +76,12 @@ class SaleService
         return DB::transaction(function () use ($sale, $userId) {
             $sale = Sale::query()
                 ->lockForUpdate()
-                ->with('items.product.inventory')
+                ->with([
+                    'items' => fn ($query) => $query->with([
+                        'product' => fn ($productQuery) => $productQuery->withTrashed(),
+                        'product.inventory',
+                    ]),
+                ])
                 ->findOrFail($sale->id);
 
             if ($sale->status === SaleStatus::VOIDED) {

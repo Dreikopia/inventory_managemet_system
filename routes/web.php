@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -41,5 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/inventories/{inventory}/adjustment', [InventoryMovementController::class, 'adjustment'])->name('adjustment');
 
     Route::get('/movements', [InventoryMovementController::class, 'index'])->name('movements.index');
+
+    Route::get('/sales', [SaleController::class, 'index'])->name('sales');
+    Route::get('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
+
+    Route::patch('/sales/{sale}/void', [SaleController::class, 'void'])->name('sales.void');
 
 });
