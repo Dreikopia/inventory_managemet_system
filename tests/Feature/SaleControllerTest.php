@@ -28,6 +28,46 @@ it('renders the sales index page', function () {
         ->assertInertia(fn (Assert $page) => $page->component('Sales/Index'));
 });
 
+it('lists sales newest first with their item count and cashier', function () {
+    $older = Sale::create([
+        'sales_number' => 'S-0001',
+        'user_id' => $this->user->id,
+        'total_amount' => 300,
+        'status' => SaleStatus::COMPLETED,
+    ]);
+
+    $older->forceFill(['created_at' => now()->subDay()])->save();
+
+    $newer = Sale::create([
+        'sales_number' => 'S-0002',
+        'user_id' => $this->user->id,
+        'total_amount' => 1250,
+        'status' => SaleStatus::VOIDED,
+        'voided_at' => now(),
+    ]);
+
+    $product = Product::factory()->create();
+
+    $newer->items()->create([
+        'product_id' => $product->id,
+        'quantity' => 3,
+        'unit_price' => 100,
+        'subtotal' => 300,
+    ]);
+
+    $this->get(route('sales'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Sales/Index')
+            ->has('sales.data', 2)
+            ->where('sales.data.0.sales_number', 'S-0002')
+            ->where('sales.data.0.items_count', 1)
+            ->where('sales.data.0.user.name', $this->user->name)
+            ->where('sales.data.1.sales_number', 'S-0001')
+            ->where('sales.data.1.items_count', 0)
+        );
+});
+
 it('renders the create page with products and their inventory', function () {
     $product = Product::factory()->create(['name' => 'Split Air Conditioner']);
     Inventory::factory()->for($product)->create(['quantity' => 12]);

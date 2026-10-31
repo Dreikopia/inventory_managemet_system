@@ -15,7 +15,14 @@ class SaleController extends Controller
 
     public function index()
     {
-        return Inertia::render('Sales/Index');
+        return Inertia::render('Sales/Index', [
+            'sales' => Sale::query()
+                ->with('user:id,name')
+                ->withCount('items')
+                ->latest()
+                ->orderByDesc('id')
+                ->paginate(10),
+        ]);
     }
 
     public function create()
